@@ -1,0 +1,10 @@
+(()=>{
+const layer=L.layerGroup(),renderer=L.canvas({padding:0.2});let rows=null,loading=false;
+const control=L.control({position:'bottomleft'});
+control.onAdd=()=>{const el=L.DomUtil.create('div');el.style.cssText='background:#0b1914;color:#fff;padding:8px 12px;border-radius:8px;font-size:13px;max-width:260px';el.setAttribute('role','status');control.el=el;return el};
+function render(){layer.clearLayers();if(!leafletMap.hasLayer(layer))return;control.el.textContent=leafletMap.getZoom()<16?'Postes: aproxime o mapa (zoom 16+)':!rows?'Carregando postes…':'Postes — BDGD 2025 · área urbana';if(!rows||leafletMap.getZoom()<16)return;const bounds=leafletMap.getBounds();for(const p of rows){if(!bounds.contains([p[0],p[1]]))continue;L.circleMarker([p[0],p[1]],{renderer,radius:5,color:'#714000',weight:1.5,fillColor:'#ffc857',fillOpacity:0.95,bubblingMouseEvents:false}).bindPopup('<strong>'+escapeHtml(p[2])+'</strong><br>Material: '+escapeHtml(p[3])+'<br>Altura: '+escapeHtml(p[4])+' m<br>Estrutura: '+escapeHtml(p[5])+'<br>'+p[0].toFixed(6)+', '+p[1].toFixed(6)+'<br><small>Amazonas Energia · BDGD 2025</small>').addTo(layer)}}
+leafletMap.on('overlayadd',async e=>{if(e.layer!==layer)return;control.addTo(leafletMap);render();if(rows||loading)return;loading=true;try{const r=await fetch('postes-parintins.json');if(!r.ok)throw Error();const parsed=await r.json();if(!Array.isArray(parsed)||!parsed.every(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])))throw Error();rows=parsed;render()}catch(e){if(leafletMap.hasLayer(layer))control.el.textContent='Falha ao carregar postes. Desative e ative para tentar novamente.'}finally{loading=false}});
+leafletMap.on('overlayremove',e=>{if(e.layer===layer){control.remove();layer.clearLayers()}});
+leafletMap.on('moveend',render);
+mapLayersControl.addOverlay(layer,'⚡ Postes de energia — Parintins');
+})();
