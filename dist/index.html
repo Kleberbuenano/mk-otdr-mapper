@@ -94,7 +94,7 @@
   const savedBaseLayer=localStorage.getItem('mk-map-layer'),initialBaseLayerName=baseLayers[savedBaseLayer]?savedBaseLayer:'OpenStreetMap',initialBaseLayer=baseLayers[initialBaseLayerName];
   initialBaseLayer.addTo(leafletMap);
   document.querySelector('.mapbar .search').value=initialBaseLayerName+' · Parintins, AM';
-  L.control.layers(baseLayers,null,{position:'topright',collapsed:true}).addTo(leafletMap);
+  const mapLayersControl=L.control.layers(baseLayers,null,{position:'topright',collapsed:true}).addTo(leafletMap);
   leafletMap.on('baselayerchange',e=>{localStorage.setItem('mk-map-layer',e.name);const field=document.querySelector('.mapbar .search');if(field)field.value=e.name+' · Parintins, AM'});
   let routeLayer=L.layerGroup().addTo(leafletMap),measureLayer=L.layerGroup().addTo(leafletMap),userLayer=L.layerGroup().addTo(leafletMap),ceoLayer=L.layerGroup().addTo(leafletMap),siteLayer=L.layerGroup().addTo(leafletMap),eventLayer=L.layerGroup().addTo(leafletMap),editLayer=L.layerGroup().addTo(leafletMap);
   let routeSegments=[], ceos=[], sites=[], routeMeters=18420, events=[{distance:0,loss:0,type:'Lançamento'},{distance:1826,loss:.08,type:'Emenda'},{distance:3914,loss:.43,type:'Emenda'},{distance:5602,loss:.12,type:'Emenda'},{distance:7842,loss:2.13,type:'Reflexivo'},{distance:12310,loss:.17,type:'Emenda'},{distance:19064,loss:null,type:'Fim da fibra'}], reversed=false, located=[];
@@ -183,4 +183,5 @@
   document.querySelectorAll('.editor-toolbar [data-editor]').forEach(button=>button.classList.remove('active'));setupDraggableToolbar();renderEvents();updateCalibration();loadProjectKml().then(saved=>{if(saved){applyProjectKml(saved.text,saved.name);say('Projeto salvo restaurado automaticamente')}}).catch(()=>{});
 </script>
 <script src="network.js"></script>
+<script src="postes.js"></script>
 </body></html>
