@@ -52,3 +52,18 @@ Foram acrescentados dois testes: cruzamento interno sinalizado sem conexão auto
 ## Diagnóstico de componentes desconectados
 
 `analyzeEndpointConnectivity()` agrupa segmentos usando somente coincidência exata das coordenadas das extremidades (precisão padrão de 6 casas decimais). O relatório lista componentes geométricos, segmentos isolados, extremidades sem par e candidatos a junção com grau maior que 2. Não faz snap por distância e declara explicitamente que não prova continuidade óptica. A análise é diagnóstica e ainda não está ligada à interface nem ao `buildGraph()`.
+
+
+## Preparação da camada visual de diagnóstico
+
+Foi adicionado `src/diagnostic-geojson.js`, adaptador independente que transforma os relatórios da auditoria em uma `FeatureCollection` GeoJSON pronta para consumo por Leaflet ou outra biblioteca cartográfica.
+
+Classificações visuais propostas:
+
+- Azul: segmento pertencente a componente com extremidades geometricamente compartilhadas.
+- Vermelho: segmento isolado geometricamente ou extremidade sem par.
+- Âmbar: candidato de proximidade, cruzamento ou junção que exige conferência.
+
+Cada feature declara `opticalContinuityConfirmed: false` quando aplicável. O conjunto declara `diagnosticOnly: true` e `changesOperationalGraph: false`. O adaptador não modifica os segmentos de entrada, não cria arestas e não está conectado à interface nem ao grafo operacional.
+
+Os testes do adaptador cobrem a classificação de componentes, alertas de proximidade, imutabilidade dos dados de entrada e validação de parâmetros. A integração visual no mapa fica deliberadamente para uma etapa posterior, depois de validar o contrato GeoJSON e obter um KML/KMZ real de campo.
