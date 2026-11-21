@@ -56,3 +56,16 @@ test('rejects non-array segment input', () => {
 test('rejects invalid coordinate precision through the audit contract', () => {
   assert.throws(() => buildDiagnosticGeoJSON([], { precision: 13 }), RangeError);
 });
+
+
+test('does not show amber proximity alert for an exactly shared endpoint', () => {
+  const shared = { lat: baseLat, lng: baseLng };
+  const segments = [
+    [shared, { lat: baseLat, lng: baseLng + metersToLng(50) }],
+    [{ lat: baseLat, lng: baseLng }, { lat: baseLat + metersToLat(50), lng: baseLng }]
+  ];
+  const result = buildDiagnosticGeoJSON(segments);
+  assert.equal(result.properties.proximityCandidateCount, 0);
+  assert.equal(result.features.some(feature =>
+    feature.properties.diagnosticType === 'proximity-candidate'), false);
+});
