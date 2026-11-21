@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { findProximityCandidates } = require('../src/topology-audit');
+const { findProximityCandidates, analyzeEndpointConnectivity } = require('../src/topology-audit');
 
 const baseLat = -2.6;
 const baseLng = -56.8;
@@ -90,4 +90,36 @@ test('collinear overlapping segments are not reported as a point crossing', () =
   ];
   const candidates = findProximityCandidates([first, second]);
   assert.equal(candidates.some(item => item.kind === 'segment-crossing'), false);
+});
+
+
+test('endpoint connectivity reports separate components without snapping nearby segments', () => {
+  const segments = [
+    [{ lat: baseLat, lng: baseLng }, { lat: baseLat, lng: baseLng + metersToLng(50) }],
+    [{ lat: baseLat, lng: baseLng + metersToLng(50) }, { lat: baseLat, lng: baseLng + metersToLng(100) }],
+    [{ lat: baseLat + metersToLat(2), lng: baseLng + metersToLng(100) },
+      { lat: baseLat + metersToLat(2), lng: baseLng + metersToLng(150) }]
+  ];
+  const report = analyzeEndpointConnectivity(segments);
+  assert.deepEqual(report.components, [[0, 1], [2]]);
+  assert.equal(report.disconnectedComponentCount, 2);
+  assert.deepEqual(report.isolatedSegments, [2]);
+  assert.equal(report.provesOpticalContinuity, false);
+});
+
+test('endpoint connectivity flags degree-three junction candidates', () => {
+  const shared = { lat: baseLat, lng: baseLng };
+  const segments = [
+    [shared, { lat: baseLat, lng: baseLng + metersToLng(30) }],
+    [shared, { lat: baseLat + metersToLat(30), lng: baseLng }],
+    [shared, { lat: baseLat - metersToLat(30), lng: baseLng }]
+  ];
+  const report = analyzeEndpointConnectivity(segments);
+  assert.equal(report.junctionCandidates.length, 1);
+  assert.equal(report.junctionCandidates[0].degree, 3);
+  assert.deepEqual(report.components, [[0, 1, 2]]);
+});
+
+test('endpoint connectivity rejects invalid precision', () => {
+  assert.throws(() => analyzeEndpointConnectivity([], 13), RangeError);
 });
