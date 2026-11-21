@@ -67,3 +67,19 @@ Classificações visuais propostas:
 Cada feature declara `opticalContinuityConfirmed: false` quando aplicável. O conjunto declara `diagnosticOnly: true` e `changesOperationalGraph: false`. O adaptador não modifica os segmentos de entrada, não cria arestas e não está conectado à interface nem ao grafo operacional.
 
 Os testes do adaptador cobrem a classificação de componentes, alertas de proximidade, imutabilidade dos dados de entrada e validação de parâmetros. A integração visual no mapa fica deliberadamente para uma etapa posterior, depois de validar o contrato GeoJSON e obter um KML/KMZ real de campo.
+
+
+## Camada visual de diagnóstico no mapa
+
+A interface do mapa recebeu um controle opcional **Diagnóstico**. Ao ativá-lo, a aplicação carrega os módulos de auditoria e apresenta uma camada Leaflet separada das camadas operacionais, além de um painel com componentes desconectados, segmentos isolados, extremidades sem par e candidatos de proximidade/cruzamento.
+
+- Azul: segmento com extremidades geometricamente compartilhadas.
+- Vermelho: componente geométrico isolado ou extremidade sem par.
+- Âmbar: candidato de proximidade, cruzamento ou junção para conferência.
+- Popups informam que cada achado exige confirmação em campo e não comprova continuidade óptica.
+- A camada é desativável e não altera o grafo, as medições, o KML ou os dados da rede.
+- Alertas âmbar de endpoint-endpoint são suprimidos quando as coordenadas coincidem na precisão de análise, evitando duplicar como alerta uma junção já classificada como compartilhamento geométrico.
+
+Como o Vercel publica somente a pasta `dist`, foram incluídas cópias dos módulos de auditoria em `dist/topology-audit.js` e `dist/diagnostic-geojson.js`. Os testes verificam também a presença desses assets e a execução do adaptador distribuído.
+
+A camada ainda requer validação visual real no navegador com KML/KMZ de campo. A aprovação de build/CI não substitui essa validação.
