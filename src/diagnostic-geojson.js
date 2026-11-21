@@ -85,14 +85,18 @@ function buildDiagnosticGeoJSON(segments, options = {}) {
     });
   });
 
+  const precision = options.precision === undefined ? 6 : options.precision;
   proximity.forEach((candidate, index) => {
     let point = candidate.point || candidate.projectedPoint;
-    if (!point && candidate.kind === 'endpoint-endpoint') {
+    if (candidate.kind === 'endpoint-endpoint') {
       const a = candidate.a, b = candidate.b;
       const aPoints = segments[a.segmentIndex], bPoints = segments[b.segmentIndex];
       const aPoint = a.end === 'start' ? aPoints[0] : aPoints[aPoints.length - 1];
       const bPoint = b.end === 'start' ? bPoints[0] : bPoints[bPoints.length - 1];
-      point = midpoint(aPoint, bPoint);
+      const sameCoordinate = aPoint.lat.toFixed(precision) === bPoint.lat.toFixed(precision) &&
+        aPoint.lng.toFixed(precision) === bPoint.lng.toFixed(precision);
+      if (sameCoordinate) return;
+      if (!point) point = midpoint(aPoint, bPoint);
     }
     if (!validPoint(point)) return;
     features.push({
