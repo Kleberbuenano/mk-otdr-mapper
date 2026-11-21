@@ -94,3 +94,23 @@ O conjunto anterior continha 27 testes automatizados e a execução PR #50 foi a
 A inspeção de um KML real identificou uma limitação no importador atual: ele importa todas as geometrias LineString, mas só retém placemarks Point classificados pelos padrões de nome CEO ou SITE/PT. Outros pontos nomeados podem ser descartados do estado editável e desaparecer em uma exportação posterior. Não se deve considerar o ciclo importar/editar/exportar fiel até que essa preservação seja corrigida e testada.
 
 A correção exige preservar os pontos não classificados como entidades genéricas, sem atribuir a eles significado de CEO ou site por suposição. O arquivo de campo deve permanecer fora do repositório público; testes permanentes devem usar coordenadas sintéticas e não identificáveis.
+
+## Preservação de pontos KML não classificados
+
+O importador agora separa os placemarks Point em três grupos sem ampliar as regras de classificação existentes:
+
+- CEO: mantém a classificação anterior de caixa e a regra anterior para o concentrador.
+- SITE/PT: mantém a classificação anterior de site.
+- Outros nomes: são preservados como pontos KML genéricos, sem serem convertidos em CEO ou site.
+
+Os pontos genéricos mantêm nome, coordenadas e descrição textual. São exibidos no mapa com simbologia própria, entram nos limites de enquadramento, permanecem no estado de undo/redo e são incluídos na exportação KML editada. Eles não participam do grafo de rotas nem do cálculo de distância OTDR.
+
+A cobertura automatizada inclui classificação das três categorias e verificações estáticas de integração no importador, mapa, histórico e exportação. Ainda é necessária inspeção no navegador com o KML de campo original para confirmar a aparência e o ciclo completo.
+
+## Limite confirmado do cadastro de cabos e fusões
+
+O módulo `dist/network.js` já existia em `main` e é idêntico ao arquivo da branch de estabilização. Ele mantém cabos e fusões no armazenamento local `mk-network-inventory-v1`, oferece backup JSON e consulta de continuidade percorrendo somente as fusões cadastradas.
+
+A consulta é independente do grafo geográfico: o módulo não recebe `routeSegments`, não chama `buildGraph()` ou `MKRouteEngine`, e informa na própria interface que não calcula distância no mapa nem confirma presença de sinal. Portanto, a continuidade exibida é a sequência de vínculos cadastrados, não um traçado geográfico nem uma validação óptica/OTDR.
+
+Não foi feita integração automática entre nomes de caixas/pontas e coordenadas. Para uma integração segura, será necessário um vínculo explícito e validado entre cada ponta de cabo, a entidade geográfica correspondente e as fibras/portas reais. Não inferir esse vínculo apenas pela semelhança de nomes ou proximidade de coordenadas.
