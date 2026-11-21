@@ -234,3 +234,4 @@ function analyzeEndpointConnectivity(segments, precision = 6) {
 
 const api = { findProximityCandidates, analyzeEndpointConnectivity };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
+if (typeof window !== 'undefined') window.MKTopologyAudit = api;
