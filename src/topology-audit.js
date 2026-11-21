@@ -104,6 +104,36 @@ function findProximityCandidates(segments, options = {}) {
     });
   });
 
+  for (let first = 0; first < segments.length; first++) {
+    const aPoints = segments[first];
+    if (!Array.isArray(aPoints)) continue;
+    for (let second = first + 1; second < segments.length; second++) {
+      const bPoints = segments[second];
+      if (!Array.isArray(bPoints)) continue;
+      for (let ai = 1; ai < aPoints.length; ai++) {
+        const a = aPoints[ai - 1], b = aPoints[ai];
+        if (!validPoint(a) || !validPoint(b)) continue;
+        for (let bi = 1; bi < bPoints.length; bi++) {
+          const c = bPoints[bi - 1], d = bPoints[bi];
+          if (!validPoint(c) || !validPoint(d)) continue;
+          const intersection = findInteriorIntersection(a, b, c, d);
+          if (intersection) candidates.push({
+            kind: 'segment-crossing',
+            a: { segmentIndex: first, edgeIndex: ai - 1 },
+            b: { segmentIndex: second, edgeIndex: bi - 1 },
+            point: intersection.point,
+            fractionA: intersection.fractionA,
+            fractionB: intersection.fractionB,
+            distanceMeters: 0,
+            requiresConfirmation: true,
+            connects: false
+          });
+        }
+      }
+    }
+  }
+
+
   return candidates.sort((a, b) => a.distanceMeters - b.distanceMeters);
 }
 
@@ -135,36 +165,6 @@ function findInteriorIntersection(a, b, c, d) {
     }
   };
 }
-
-  // Crossings between segment interiors are reported for review, not connected.
-  for (let first = 0; first < segments.length; first++) {
-    const aPoints = segments[first];
-    if (!Array.isArray(aPoints)) continue;
-    for (let second = first + 1; second < segments.length; second++) {
-      const bPoints = segments[second];
-      if (!Array.isArray(bPoints)) continue;
-      for (let ai = 1; ai < aPoints.length; ai++) {
-        const a = aPoints[ai - 1], b = aPoints[ai];
-        if (!validPoint(a) || !validPoint(b)) continue;
-        for (let bi = 1; bi < bPoints.length; bi++) {
-          const c = bPoints[bi - 1], d = bPoints[bi];
-          if (!validPoint(c) || !validPoint(d)) continue;
-          const intersection = findInteriorIntersection(a, b, c, d);
-          if (intersection) candidates.push({
-            kind: 'segment-crossing',
-            a: { segmentIndex: first, edgeIndex: ai - 1 },
-            b: { segmentIndex: second, edgeIndex: bi - 1 },
-            point: intersection.point,
-            fractionA: intersection.fractionA,
-            fractionB: intersection.fractionB,
-            distanceMeters: 0,
-            requiresConfirmation: true,
-            connects: false
-          });
-        }
-      }
-    }
-  }
 
 const api = { findProximityCandidates };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
