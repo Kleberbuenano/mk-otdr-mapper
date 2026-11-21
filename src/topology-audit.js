@@ -166,5 +166,71 @@ function findInteriorIntersection(a, b, c, d) {
   };
 }
 
-const api = { findProximityCandidates };
+
+/**
+ * Reports segment components using exact shared endpoint coordinates only.
+ * This is a geometry diagnostic, not proof of optical continuity.
+ */
+function analyzeEndpointConnectivity(segments, precision = 6) {
+  if (!Array.isArray(segments)) throw new TypeError('segments must be an array');
+  if (!Number.isInteger(precision) || precision < 0 || precision > 12) {
+    throw new RangeError('precision must be an integer from 0 to 12');
+  }
+  const keyOf = point => validPoint(point)
+    ? point.lat.toFixed(precision) + ',' + point.lng.toFixed(precision)
+    : null;
+  const endpointOwners = new Map();
+  const validSegments = [];
+  segments.forEach((points, segmentIndex) => {
+    if (!Array.isArray(points) || points.length < 2 ||
+        !validPoint(points[0]) || !validPoint(points.at(-1))) return;
+    validSegments.push(segmentIndex);
+    for (const [end, point] of [['start', points[0]], ['end', points.at(-1)]]) {
+      const key = keyOf(point);
+      if (!endpointOwners.has(key)) endpointOwners.set(key, []);
+      endpointOwners.get(key).push({ segmentIndex, end });
+    }
+  });
+  const adjacency = new Map(validSegments.map(index => [index, new Set()]));
+  const endpointDegree = [];
+  for (const [coordinate, owners] of endpointOwners) {
+    endpointDegree.push({ coordinate, degree: owners.length, owners });
+    for (let i = 0; i < owners.length; i++) {
+      for (let j = i + 1; j < owners.length; j++) {
+        const a = owners[i].segmentIndex, b = owners[j].segmentIndex;
+        if (a !== b) {
+          adjacency.get(a).add(b);
+          adjacency.get(b).add(a);
+        }
+      }
+    }
+  }
+  const components = [];
+  const unseen = new Set(validSegments);
+  while (unseen.size) {
+    const first = unseen.values().next().value;
+    const stack = [first], members = [];
+    unseen.delete(first);
+    while (stack.length) {
+      const current = stack.pop();
+      members.push(current);
+      for (const neighbor of adjacency.get(current)) {
+        if (unseen.delete(neighbor)) stack.push(neighbor);
+      }
+    }
+    components.push(members.sort((a, b) => a - b));
+  }
+  return {
+    method: 'exact-endpoint-coordinate-match',
+    components,
+    disconnectedComponentCount: components.length,
+    isolatedSegments: validSegments.filter(index => adjacency.get(index).size === 0),
+    danglingEndpoints: endpointDegree.filter(item => item.degree === 1),
+    junctionCandidates: endpointDegree.filter(item => item.degree > 2),
+    requiresFieldConfirmation: true,
+    provesOpticalContinuity: false
+  };
+}
+
+const api = { findProximityCandidates, analyzeEndpointConnectivity };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
