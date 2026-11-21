@@ -40,3 +40,10 @@ Foi adicionado `src/topology-audit.js` para listar candidatos geométricos de pr
 **Importante:** o módulo é somente diagnóstico. Cada candidato retorna `requiresConfirmation: true` e `connects: false`. Ele não cria arestas, não altera `buildGraph()` e não muda rotas, GPS ou medições. A intenção é preparar uma revisão de campo sem introduzir uma nova regra topológica sem evidência.
 
 Os limites são parâmetros de triagem, não tolerâncias universais de instalação. A validação final exige KML/KMZ de uma rede conhecida e confirmação de continuidade física.
+
+
+## Cruzamentos entre trechos
+
+A auditoria também sinaliza cruzamentos geométricos entre o interior de dois segmentos distintos (tipo `segment-crossing`). Isso ajuda a identificar cabos que se cruzam no mapa sem que se saiba se existe emenda, derivação ou apenas passagem em níveis diferentes. O cruzamento é sempre um alerta de revisão: `requiresConfirmation: true` e `connects: false`. Segmentos colineares ou sobrepostos não são tratados como um ponto único de cruzamento.
+
+Foram acrescentados dois testes: cruzamento interno sinalizado sem conexão automática e sobreposição colinear sem falso ponto de cruzamento.
