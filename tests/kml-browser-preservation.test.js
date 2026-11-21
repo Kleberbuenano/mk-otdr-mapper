@@ -18,6 +18,8 @@ test('KML parser retains generic point placemarks and their descriptions', () =>
 test('generic KML points are included in map bounds and visible as unclassified markers', () => {
   assert.match(html, /\.\.\.sites,\.\.\.genericPoints/);
   assert.match(html, /Ponto KML não classificado/);
+  assert.match(html, /genericPointLayer=L\.layerGroup\(\)\.addTo\(leafletMap\)/);
+  assert.match(html, /addTo\(genericPointLayer\)/);
 });
 
 test('generic KML points survive project history and KML export', () => {
