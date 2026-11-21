@@ -21,3 +21,11 @@ test('deployed diagnostic bundle produces GeoJSON with safe metadata', () => {
   assert.equal(result.properties.changesOperationalGraph, false);
   assert.equal(result.properties.opticalContinuityConfirmed, false);
 });
+
+test('empty project refreshes and clears active topology diagnostics', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../dist/index.html'), 'utf8');
+  assert.match(
+    html,
+    /if\(!routeSegments\.length&&!ceos\.length&&!sites\.length\)\{if\(topologyDiagnosticsEnabled\)refreshTopologyDiagnostics\(\);return;\}/
+  );
+});
