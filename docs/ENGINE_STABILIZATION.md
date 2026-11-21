@@ -103,7 +103,7 @@ O importador agora separa os placemarks Point em três grupos sem ampliar as reg
 - SITE/PT: mantém a classificação anterior de site.
 - Outros nomes: são preservados como pontos KML genéricos, sem serem convertidos em CEO ou site.
 
-Os pontos genéricos mantêm nome, coordenadas e descrição textual. São exibidos no mapa com simbologia própria, entram nos limites de enquadramento, permanecem no estado de undo/redo e são incluídos na exportação KML editada. Eles não participam do grafo de rotas nem do cálculo de distância OTDR.
+Os pontos genéricos mantêm nome, coordenadas e descrição textual. São exibidos em uma camada Leaflet própria, independente da camada de sites, entram nos limites de enquadramento, permanecem no estado de undo/redo e são incluídos na exportação KML editada. Eles não participam do grafo de rotas nem do cálculo de distância OTDR.
 
 A cobertura automatizada inclui classificação das três categorias e verificações estáticas de integração no importador, mapa, histórico e exportação. Ainda é necessária inspeção no navegador com o KML de campo original para confirmar a aparência e o ciclo completo.
 
