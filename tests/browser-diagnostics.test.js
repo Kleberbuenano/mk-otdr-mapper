@@ -26,6 +26,6 @@ test('empty project refreshes and clears active topology diagnostics', () => {
   const html = fs.readFileSync(path.join(__dirname, '../dist/index.html'), 'utf8');
   assert.match(
     html,
-    /if\(!routeSegments\.length&&!ceos\.length&&!sites\.length\)\{if\(topologyDiagnosticsEnabled\)refreshTopologyDiagnostics\(\);return;\}/
+    /if\(!routeSegments\.length&&!ceos\.length&&!sites\.length&&!genericPoints\.length\)\{if\(topologyDiagnosticsEnabled\)refreshTopologyDiagnostics\(\);return;\}/
   );
 });
