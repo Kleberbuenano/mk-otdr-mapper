@@ -83,3 +83,8 @@ A interface do mapa recebeu um controle opcional **Diagnóstico**. Ao ativá-lo,
 Como o Vercel publica somente a pasta `dist`, foram incluídas cópias dos módulos de auditoria em `dist/topology-audit.js` e `dist/diagnostic-geojson.js`. Os testes verificam também a presença desses assets e a execução do adaptador distribuído.
 
 A camada ainda requer validação visual real no navegador com KML/KMZ de campo. A aprovação de build/CI não substitui essa validação.
+
+
+## Testes após integração da camada
+
+O conjunto atual contém 27 testes automatizados, incluindo a leitura do bundle publicado em `dist`, presença dos controles na página e supressão de alertas âmbar duplicados em endpoints com coordenadas compartilhadas. Execução PR #50 aprovada: 27 testes, 0 falhas.
