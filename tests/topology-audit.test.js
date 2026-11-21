@@ -59,3 +59,35 @@ test('invalid thresholds are rejected', () => {
     RangeError
   );
 });
+
+test('interior crossing of two cable segments is flagged but never connected', () => {
+  const horizontal = [
+    { lat: baseLat, lng: baseLng - metersToLng(50) },
+    { lat: baseLat, lng: baseLng + metersToLng(50) }
+  ];
+  const vertical = [
+    { lat: baseLat - metersToLat(50), lng: baseLng },
+    { lat: baseLat + metersToLat(50), lng: baseLng }
+  ];
+  const candidates = findProximityCandidates([horizontal, vertical]);
+  const crossing = candidates.find(item => item.kind === 'segment-crossing');
+  assert.ok(crossing);
+  assert.equal(crossing.distanceMeters, 0);
+  assert.ok(Math.abs(crossing.point.lat - baseLat) < 1e-8);
+  assert.ok(Math.abs(crossing.point.lng - baseLng) < 1e-8);
+  assert.equal(crossing.requiresConfirmation, true);
+  assert.equal(crossing.connects, false);
+});
+
+test('collinear overlapping segments are not reported as a point crossing', () => {
+  const first = [
+    { lat: baseLat, lng: baseLng },
+    { lat: baseLat, lng: baseLng + metersToLng(100) }
+  ];
+  const second = [
+    { lat: baseLat, lng: baseLng + metersToLng(25) },
+    { lat: baseLat, lng: baseLng + metersToLng(75) }
+  ];
+  const candidates = findProximityCandidates([first, second]);
+  assert.equal(candidates.some(item => item.kind === 'segment-crossing'), false);
+});
