@@ -87,8 +87,20 @@ function findProximityCandidates(segments, options = {}) {
         const end = points[edgeIndex];
         if (!validPoint(start) || !validPoint(end)) continue;
         const projection = projectOnSegment(endpoint.point, start, end);
+        if (projection.distanceMeters > endpointToSegmentMeters) continue;
+
+        // If the endpoint is also within the endpoint-merge tolerance of a
+        // target vertex, the endpoint-endpoint candidate already describes
+        // this relationship. Avoid drawing a second amber alert at the same
+        // junction as an endpoint-to-segment warning.
+        const nearestTargetVertex = Math.min(
+          haversine(endpoint.point, start),
+          haversine(endpoint.point, end)
+        );
+        if (nearestTargetVertex <= endpointMergeMeters) continue;
         if (projection.fraction <= 1e-6 || projection.fraction >= 1 - 1e-6) continue;
-        if (projection.distanceMeters <= endpointToSegmentMeters) {
+
+        {
           candidates.push({
             kind: 'endpoint-to-segment',
             endpoint: { segmentIndex: endpoint.segmentIndex, end: endpoint.end },
