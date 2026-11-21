@@ -87,4 +87,10 @@ A camada ainda requer validação visual real no navegador com KML/KMZ de campo.
 
 ## Testes após integração da camada
 
-O conjunto atual contém 27 testes automatizados, incluindo a leitura do bundle publicado em `dist`, presença dos controles na página e supressão de alertas âmbar duplicados em endpoints com coordenadas compartilhadas. Execução PR #50 aprovada: 27 testes, 0 falhas.
+O conjunto anterior continha 27 testes automatizados e a execução PR #50 foi aprovada antes das últimas alterações. Foram acrescentados dois testes: supressão de alerta endpoint-to-segment quando a mesma relação já é representada por endpoint-endpoint, e atualização da camada diagnóstica quando o projeto fica vazio. O total esperado agora é 29 testes; a aprovação do CI para o novo head ainda precisa ser confirmada.
+
+## Observações de importação a partir de KML de campo
+
+A inspeção de um KML real identificou uma limitação no importador atual: ele importa todas as geometrias LineString, mas só retém placemarks Point classificados pelos padrões de nome CEO ou SITE/PT. Outros pontos nomeados podem ser descartados do estado editável e desaparecer em uma exportação posterior. Não se deve considerar o ciclo importar/editar/exportar fiel até que essa preservação seja corrigida e testada.
+
+A correção exige preservar os pontos não classificados como entidades genéricas, sem atribuir a eles significado de CEO ou site por suposição. O arquivo de campo deve permanecer fora do repositório público; testes permanentes devem usar coordenadas sintéticas e não identificáveis.
