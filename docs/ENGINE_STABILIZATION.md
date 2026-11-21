@@ -47,3 +47,8 @@ Os limites são parâmetros de triagem, não tolerâncias universais de instala�
 A auditoria também sinaliza cruzamentos geométricos entre o interior de dois segmentos distintos (tipo `segment-crossing`). Isso ajuda a identificar cabos que se cruzam no mapa sem que se saiba se existe emenda, derivação ou apenas passagem em níveis diferentes. O cruzamento é sempre um alerta de revisão: `requiresConfirmation: true` e `connects: false`. Segmentos colineares ou sobrepostos não são tratados como um ponto único de cruzamento.
 
 Foram acrescentados dois testes: cruzamento interno sinalizado sem conexão automática e sobreposição colinear sem falso ponto de cruzamento.
+
+
+## Diagnóstico de componentes desconectados
+
+`analyzeEndpointConnectivity()` agrupa segmentos usando somente coincidência exata das coordenadas das extremidades (precisão padrão de 6 casas decimais). O relatório lista componentes geométricos, segmentos isolados, extremidades sem par e candidatos a junção com grau maior que 2. Não faz snap por distância e declara explicitamente que não prova continuidade óptica. A análise é diagnóstica e ainda não está ligada à interface nem ao `buildGraph()`.
