@@ -123,3 +123,19 @@ test('endpoint connectivity flags degree-three junction candidates', () => {
 test('endpoint connectivity rejects invalid precision', () => {
   assert.throws(() => analyzeEndpointConnectivity([], 13), RangeError);
 });
+
+test('does not duplicate a nearby endpoint junction as endpoint-to-segment', () => {
+  const segments = [
+    [
+      { lat: baseLat, lng: baseLng },
+      { lat: baseLat, lng: baseLng + metersToLng(50) }
+    ],
+    [
+      { lat: baseLat + metersToLat(2), lng: baseLng + metersToLng(50) },
+      { lat: baseLat + metersToLat(2), lng: baseLng + metersToLng(100) }
+    ]
+  ];
+  const candidates = findProximityCandidates(segments);
+  assert.ok(candidates.some(item => item.kind === 'endpoint-endpoint'));
+  assert.equal(candidates.some(item => item.kind === 'endpoint-to-segment'), false);
+});
