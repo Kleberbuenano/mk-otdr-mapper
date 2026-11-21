@@ -1,0 +1,9 @@
+{
+  "name": "mk-otdr-mapper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Testes locais do motor geográfico do MK OTDR Mapper",
+  "scripts": {
+    "test": "node --test"
+  }
+}
