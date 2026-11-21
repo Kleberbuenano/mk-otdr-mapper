@@ -122,7 +122,7 @@ function buildDiagnosticGeoJSON(segments, options = {}) {
       method: connectivity.method,
       disconnectedComponentCount: connectivity.disconnectedComponentCount,
       isolatedSegmentCount: connectivity.isolatedSegments.length,
-      proximityCandidateCount: proximity.length,
+      proximityCandidateCount: features.filter(feature => feature.properties.diagnosticType === 'proximity-candidate').length,
       opticalContinuityConfirmed: false,
       changesOperationalGraph: false
     }
