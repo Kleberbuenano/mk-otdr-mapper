@@ -107,5 +107,64 @@ function findProximityCandidates(segments, options = {}) {
   return candidates.sort((a, b) => a.distanceMeters - b.distanceMeters);
 }
 
+
+function findInteriorIntersection(a, b, c, d) {
+  const originLat = (a.lat + b.lat + c.lat + d.lat) / 4;
+  const metersPerDegreeLat = 111132.92;
+  const metersPerDegreeLng = 111412.84 * Math.cos(originLat * Math.PI / 180);
+  const xy = p => ({
+    x: (p.lng - a.lng) * metersPerDegreeLng,
+    y: (p.lat - a.lat) * metersPerDegreeLat
+  });
+  const p = xy(a), p2 = xy(b), q = xy(c), q2 = xy(d);
+  const rx = p2.x - p.x, ry = p2.y - p.y;
+  const sx = q2.x - q.x, sy = q2.y - q.y;
+  const denominator = rx * sy - ry * sx;
+  if (Math.abs(denominator) < 1e-9) return null;
+  const qpx = q.x - p.x, qpy = q.y - p.y;
+  const t = (qpx * sy - qpy * sx) / denominator;
+  const u = (qpx * ry - qpy * rx) / denominator;
+  const epsilon = 1e-6;
+  if (t <= epsilon || t >= 1 - epsilon || u <= epsilon || u >= 1 - epsilon) return null;
+  return {
+    fractionA: t,
+    fractionB: u,
+    point: {
+      lat: a.lat + (b.lat - a.lat) * t,
+      lng: a.lng + (b.lng - a.lng) * t
+    }
+  };
+}
+
+  // Crossings between segment interiors are reported for review, not connected.
+  for (let first = 0; first < segments.length; first++) {
+    const aPoints = segments[first];
+    if (!Array.isArray(aPoints)) continue;
+    for (let second = first + 1; second < segments.length; second++) {
+      const bPoints = segments[second];
+      if (!Array.isArray(bPoints)) continue;
+      for (let ai = 1; ai < aPoints.length; ai++) {
+        const a = aPoints[ai - 1], b = aPoints[ai];
+        if (!validPoint(a) || !validPoint(b)) continue;
+        for (let bi = 1; bi < bPoints.length; bi++) {
+          const c = bPoints[bi - 1], d = bPoints[bi];
+          if (!validPoint(c) || !validPoint(d)) continue;
+          const intersection = findInteriorIntersection(a, b, c, d);
+          if (intersection) candidates.push({
+            kind: 'segment-crossing',
+            a: { segmentIndex: first, edgeIndex: ai - 1 },
+            b: { segmentIndex: second, edgeIndex: bi - 1 },
+            point: intersection.point,
+            fractionA: intersection.fractionA,
+            fractionB: intersection.fractionB,
+            distanceMeters: 0,
+            requiresConfirmation: true,
+            connects: false
+          });
+        }
+      }
+    }
+  }
+
 const api = { findProximityCandidates };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
