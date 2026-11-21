@@ -1,0 +1,28 @@
+name: Testes do MK OTDR Mapper
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - feature/engine-stabilization
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Testes automatizados
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Executar testes
+        run: npm test
