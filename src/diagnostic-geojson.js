@@ -1,9 +1,10 @@
 'use strict';
 
-const {
-  findProximityCandidates,
-  analyzeEndpointConnectivity
-} = require('./topology-audit');
+const topologyApi = typeof module !== 'undefined' && module.exports
+  ? require('./topology-audit')
+  : (typeof window !== 'undefined' ? window.MKTopologyAudit : null);
+if (!topologyApi) throw new Error('MKTopologyAudit must be loaded before diagnostic-geojson.js');
+const { findProximityCandidates, analyzeEndpointConnectivity } = topologyApi;
 
 function validPoint(point) {
   return point && Number.isFinite(point.lat) && Number.isFinite(point.lng);
@@ -124,4 +125,5 @@ function buildDiagnosticGeoJSON(segments, options = {}) {
   };
 }
 
-module.exports = { buildDiagnosticGeoJSON };
+if (typeof module !== 'undefined' && module.exports) module.exports = { buildDiagnosticGeoJSON };
+if (typeof window !== 'undefined') window.MKDiagnosticGeoJSON = { buildDiagnosticGeoJSON };
