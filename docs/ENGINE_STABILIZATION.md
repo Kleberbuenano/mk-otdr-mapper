@@ -28,3 +28,15 @@ A Rota 02 deve ser uma alternativa topológica real à Rota 01. Se não existir 
 ## Limites desta entrega
 
 Não há arquivos de teste KML/KMZ/SOR reais anexados a esta alteração. Os critérios acima precisam ser executados com projetos reais de campo antes de qualquer merge ou publicação. Nenhuma alteração nesta branch deve ser promovida automaticamente para produção.
+
+## Auditoria diagnóstica de proximidade
+
+Foi adicionado `src/topology-audit.js` para listar candidatos geométricos de proximidade entre segmentos distintos:
+
+- endpoints de segmentos diferentes dentro do limite configurado (padrão: 18 m);
+- endpoint próximo ao interior de outro segmento (padrão: 25 m);
+- distância, identificação dos segmentos e projeção aproximada são retornadas para revisão.
+
+**Importante:** o módulo é somente diagnóstico. Cada candidato retorna `requiresConfirmation: true` e `connects: false`. Ele não cria arestas, não altera `buildGraph()` e não muda rotas, GPS ou medições. A intenção é preparar uma revisão de campo sem introduzir uma nova regra topológica sem evidência.
+
+Os limites são parâmetros de triagem, não tolerâncias universais de instalação. A validação final exige KML/KMZ de uma rede conhecida e confirmação de continuidade física.
